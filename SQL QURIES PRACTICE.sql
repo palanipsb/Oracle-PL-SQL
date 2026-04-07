@@ -409,7 +409,7 @@ WITH DAYS AS
 LAST_DAY(MAX(TRAN_DATE)) AS LAST_DATE,
 LAST_DAY(MAX(TRAN_DATE)) - TRUNC(MIN(TRAN_DATE),'MONTH')+1 AS NO_OF_DAYS
 FROM DAILY_TRAN_T),
-ALL_DAYS_D AS (SELECT FIRST_DATE+LEVEL-1 AS DATES ,
+LALL_DAYS_D AS (SELECT FIRST_DATE+LEVEL-1 AS DATES ,
 TRIM(TO_CHAR(FIRST_DATE+LEVEL-1,'DAY')) AS ALL_DAYS
 FROM DAYS
 CONNECT BY LEVEL<=NO_OF_DAYS)
@@ -656,4 +656,20 @@ SELECT ID,SUM(DECODE(STATUS,'Red',0,1)) OVER (PARTITION BY ID ORDER BY TO_DATE(R
 FROM PRJ_STATUS)
 WHERE D =0 GROUP BY ID HAVING COUNT(*) >= 3
 
-30. 
+30. SQL to summarise data one row for continuous play of aulbum
+
+with t1 as(
+select d,v,lag(v) over (order by d)v1,
+case when v = nvl(lag(v,1) over (order by d),v) then 0 else 1 end v2
+from t),
+t2 as(select d,v,v1,v2,
+sum(v2) over (order by d)v3
+from t1)
+select min(d)first_week, count(v3)number_of_play from t2 group by v3
+order by min(d)
+
+31. SQL to fill the missing months with Previous month salary.
+
+select * from emp_salary;
+
+select ename,to_date(sal_month_year,'Mon-yy'),salary from emp_salary;
